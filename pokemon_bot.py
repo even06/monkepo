@@ -529,18 +529,6 @@ class StarterConfirmationView(discord.ui.View):
         ivs = json.loads(pending['generated_ivs'])
         
         try:
-            # Create user if doesn't exist
-            user_exists_query = "SELECT id FROM users WHERE id = %s"
-            if not self.db.execute_fetchone(user_exists_query, (user_id,)):
-                create_user_query = """
-                INSERT INTO users (id, username, discriminator, created_at)
-                VALUES (%s, %s, %s, %s)
-                """
-                self.db.execute_query(create_user_query, (
-                    user_id, interaction.user.name, 
-                    interaction.user.discriminator, datetime.now()
-                ))
-            
             # Create starter Pokemon
             starter_query = """
             INSERT INTO pokemon (
@@ -715,8 +703,8 @@ class PersistentStarterView(discord.ui.View):
         self.translations = translations
     
     @discord.ui.button(label='🚀 Start Your Pokemon Journey', 
-                      style=discord.ButtonStyle.success, 
-                      custom_id='persistent_start_journey')
+                  style=discord.ButtonStyle.success, 
+                  custom_id='persistent_start_journey')
     async def start_journey(self, interaction: discord.Interaction, button: discord.ui.Button):
         user_id = str(interaction.user.id)
         server_id = str(interaction.guild.id)
@@ -734,6 +722,17 @@ class PersistentStarterView(discord.ui.View):
                 ephemeral=True
             )
             return
+        
+        # ✅ CREATE USER IMMEDIATELY (NEW CODE)
+        create_user_query = """
+        INSERT INTO users (id, username, discriminator, created_at)
+        VALUES (%s, %s, %s, %s)
+        """
+        self.db.execute_query(create_user_query, (
+            user_id, interaction.user.name, 
+            interaction.user.discriminator or '0000', datetime.now()
+        ))
+        print(f"✅ Created user record for {interaction.user.name}")
         
         # Show starter selection
         view = StarterSelectionView(user_id, server_id, self.db, self.translations, lang)
