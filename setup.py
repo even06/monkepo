@@ -83,7 +83,7 @@ def test_bot_token():
         return False
     
     # Basic token format check
-    if not DISCORD_BOT_TOKEN.startswith(('MTA', 'MTB', 'MTC', 'MTD', 'MTE', 'MTF', 'MTG', 'MTH', 'MTI', 'MTJ')):
+    if not DISCORD_BOT_TOKEN.startswith(('MTA', 'MTB', 'MTC', 'MTD', 'MTE', 'MTF', 'MTG', 'MTH', 'MTI', 'MTJ', 'MTM')):
         print("❌ Discord bot token format looks invalid")
         return False
     

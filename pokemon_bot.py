@@ -990,7 +990,7 @@ class PokemonBot(commands.Bot):
 bot = PokemonBot()
 
 # Admin Commands
-@bot.tree.command(name="admin")
+@bot.tree.command(name="mkp-admin")
 async def admin_setup(interaction: discord.Interaction):
     """Configure Pokemon bot settings for this server"""
     
@@ -1041,7 +1041,7 @@ async def admin_setup(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 # Basic Pokemon commands
-@bot.tree.command(name="pokemon")
+@bot.tree.command(name="monkepo")
 async def pokemon_command(interaction: discord.Interaction, action: str):
     """
     Pokemon management commands
