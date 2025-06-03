@@ -1,0 +1,256 @@
+# Pokemon Battle Bot - .gitignore
+
+# ===================================
+# SENSITIVE FILES - NEVER COMMIT THESE
+# ===================================
+
+# Environment variables (contains secrets!)
+.env
+.env.local
+.env.production
+.env.staging
+
+# Config files with sensitive data
+config_local.py
+config_production.py
+secrets.py
+
+# Database credentials
+database.conf
+db_config.json
+
+# Bot tokens and API keys
+bot_token.txt
+discord_token.txt
+*.key
+*.pem
+
+# ===================================
+# PYTHON CACHE AND BUILD FILES
+# ===================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# ===================================
+# LOG FILES AND RUNTIME DATA
+# ===================================
+
+# Bot logs
+logs/
+*.log
+*.log.*
+
+# Runtime files
+pokemon_bot.pid
+bot.pid
+
+# Database files (if using SQLite for testing)
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
+backup/
+backups/
+
+# ===================================
+# IDE AND EDITOR FILES
+# ===================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ===================================
+# OS-SPECIFIC FILES
+# ===================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===================================
+# TEMPORARY AND CACHE FILES
+# ===================================
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Cache directories
+.cache/
+cache/
+
+# Node modules (if using any JS tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===================================
+# DEVELOPMENT AND TESTING FILES
+# ===================================
+
+# Test databases
+test.db
+test_pokemon.db
+
+# Development scripts
+dev_*.py
+test_*.py
+debug_*.py
+
+# Local development configs
+local_settings.py
+dev_config.py
+
+# Documentation builds
+docs/_build/
+site/
+
+# ===================================
+# DOCKER FILES (for future use)
+# ===================================
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# ===================================
+# POKEMON-SPECIFIC FILES
+# ===================================
+
+# Generated sprite caches
+sprites/cache/
+sprite_cache/
+
+# Battle replay files (large)
+replays/
+battle_logs/
+
+# User data exports (privacy)
+exports/
+user_data/
+
+# Performance logs
+performance.log
+memory_usage.log
+
+# ===================================
+# SECURITY SCANNING RESULTS
+# ===================================
+
+# Security scan results
+.bandit
+security_report.txt
+vulnerability_scan.json
+
+# ===================================
+# EXAMPLE SAFE FILES TO KEEP
+# ===================================
+
+# These files ARE safe to commit:
+# .env.example
+# config.py (without real credentials)
+# requirements.txt
+# pokemon_bot.py
+# translations/*.json
+# README.md
+# setup.py
