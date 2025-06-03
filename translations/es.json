@@ -34,7 +34,7 @@
     "welcome_description": "¡Felicitaciones! ¡Oficialmente te has convertido en un entrenador Pokemon!",
     "your_starter": "**Tu Pokemon Inicial:**\n{pokemon_info}",
     "starter_kit": "**Kit Inicial Recibido:**\n• 3× Poción (Cura 20 HP)\n• 1× Antídoto (Cura envenenamiento)\n• 5× Pokeball (Captura Pokemon salvajes)\n• 500 Pokedólares (Moneda de tienda)",
-    "next_steps": "**Próximos Pasos:**\n• Usa `/pokemon list` para ver tu equipo\n• Desafía otros entrenadores a batallas\n• ¡Explora y captura más Pokemon!",
+    "next_steps": "**Próximos Pasos:**\n• Usa `/monkepo list` para ver tu equipo\n• Desafía otros entrenadores a batallas\n• ¡Explora y captura más Pokemon!",
     "creation_failed": "❌ Algo salió mal creando tu equipo. Por favor intenta de nuevo en un momento.",
     "session_expired": "❌ Tu sesión de selección inicial ha expirado. Por favor comienza de nuevo.",
     "invalid_selection": "❌ Selección de Pokemon inválida. Por favor intenta de nuevo."
