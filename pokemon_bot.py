@@ -705,6 +705,7 @@ class PersistentStarterView(discord.ui.View):
     @discord.ui.button(label='🚀 Start Your Pokemon Journey', 
                   style=discord.ButtonStyle.success, 
                   custom_id='persistent_start_journey')
+    
     async def start_journey(self, interaction: discord.Interaction, button: discord.ui.Button):
         user_id = str(interaction.user.id)
         server_id = str(interaction.guild.id)

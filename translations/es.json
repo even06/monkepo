@@ -1,10 +1,27 @@
 {
+  "buttons": {
+    "start_journey": "🚀 Comenzar Tu Aventura Pokemon",
+    "name_pokemon": "📝 Nombrar Este Pokemon",
+    "confirm_choice": "✅ Confirmar Elección", 
+    "choose_different": "❌ Elegir Pokemon Diferente",
+    "charmander": "🔥 Charmander",
+    "squirtle": "💧 Squirtle",
+    "bulbasaur": "🌿 Bulbasaur"
+  },
+  "embeds": {
+    "starter_choice": "🌟 Elección Inicial",
+    "trainer_info": "📊 Info del Entrenador",
+    "status": "Estado", 
+    "type_matchups": "Compatibilidades de Tipo",
+    "level_stats": "Estadísticas Nivel 5"
+  },
   "admin": {
     "setup_title": "🔧 Configuración del Bot Pokemon",
-    "setup_description": "Configura los ajustes del bot Pokemon para este servidor.",
-    "set_starter_channel": "Establecer Canal Inicial",
-    "set_updates_channel": "Establecer Canal de Actualizaciones",
-    "set_language": "Cambiar Idioma", 
+    "setup_description": "Configura el Monkepo bot en tu Discord.",
+    "set_starter_channel": "🏠 Establecer Canal Inicial",
+    "set_updates_channel": "📢 Establecer Canal de Actualizaciones", 
+    "set_language": "🌐 Cambiar Idioma",
+    "preview_setup": "👀 Vista Previa",
     "preview_setup": "Vista Previa",
     "config_complete": "✅ ¡Configuración Completa!",
     "config_partial": "⚠️ Configuración Parcial",

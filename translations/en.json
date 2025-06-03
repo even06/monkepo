@@ -1,4 +1,20 @@
 {
+  "buttons": {
+    "start_journey": "🚀 Start Your Pokemon Journey",
+    "name_pokemon": "📝 Name This Pokemon", 
+    "confirm_choice": "✅ Confirm Choice",
+    "choose_different": "❌ Choose Different Pokemon",
+    "charmander": "🔥 Charmander",
+    "squirtle": "💧 Squirtle", 
+    "bulbasaur": "🌿 Bulbasaur"
+  },
+  "embeds": {
+    "starter_choice": "🌟 Starter Choice",
+    "trainer_info": "📊 Trainer Info", 
+    "status": "Status",
+    "type_matchups": "Type Matchups",
+    "level_stats": "Level 5 Stats"
+  },
   "admin": {
     "setup_title": "🔧 Pokemon Bot Server Setup",
     "setup_description": "Configure your Pokemon bot settings for this server.",
