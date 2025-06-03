@@ -1,0 +1,89 @@
+{
+  "admin": {
+    "setup_title": "🔧 Pokemon Bot Server Setup",
+    "setup_description": "Configure your Pokemon bot settings for this server.",
+    "set_starter_channel": "Set Starter Channel",
+    "set_updates_channel": "Set Updates Channel", 
+    "set_language": "Set Language",
+    "preview_setup": "Preview Setup",
+    "config_complete": "✅ Configuration Complete!",
+    "config_partial": "⚠️ Partial Configuration",
+    "config_missing": "❌ Configuration Required",
+    "no_permission": "❌ You need administrator permissions to use this command.",
+    "channel_set": "✅ {channel_type} channel set to {channel}",
+    "language_set": "✅ Server language set to {language}",
+    "invalid_channel": "❌ Please mention a valid text channel.",
+    "setup_preview": "**Current Configuration:**\n🏠 Starter Channel: {starter_channel}\n📢 Updates Channel: {updates_channel}\n🌐 Language: {language}"
+  },
+  "starter": {
+    "oak_title": "🎓 Professor Oak's Laboratory",
+    "oak_description": "Welcome to the world of Pokemon! I'm Professor Oak.\n\nTo begin your journey, click the button below. You'll choose your first Pokemon companion and receive your starter kit.\n\n**What you'll get:**\n• One starter Pokemon with excellent stats\n• Two additional Pokemon for your team\n• Pokeballs, Potions, and starting money\n• Your official trainer registration",
+    "start_journey": "🚀 Start Your Pokemon Journey",
+    "already_trainer": "❌ You're already a Pokemon trainer! Your journey has already begun.",
+    "choose_starter": "Choose Your Starter Pokemon",
+    "starter_description": "Each Pokemon has randomly generated stats. Choose wisely - this will be your partner for life!\n\n**Starter Benefits:**\n• Higher stat potential (20-31 IVs)\n• 50% bonus experience gain\n• Special 'Original Trainer' status",
+    "name_modal_title": "Name Your {pokemon}",
+    "name_modal_label": "Pokemon Nickname",
+    "name_modal_placeholder": "Enter a nickname for your {pokemon}",
+    "confirm_title": "🎉 Confirm Your Choice",
+    "confirm_description": "Are you sure you want to choose **{nickname}** the {pokemon}?",
+    "confirm_button": "✅ Confirm Choice",
+    "cancel_button": "❌ Choose Different Pokemon",
+    "creating_team": "🔄 Creating your Pokemon team...",
+    "welcome_title": "🎉 Welcome to the Pokemon World!",
+    "welcome_description": "Congratulations! You've officially become a Pokemon trainer!",
+    "your_starter": "**Your Starter Pokemon:**\n{pokemon_info}",
+    "starter_kit": "**Starter Kit Received:**\n• 3× Potion (Heals 20 HP)\n• 1× Antidote (Cures poison)\n• 5× Pokeball (Catch wild Pokemon)\n• 500 Pokedollars (Shop currency)",
+    "next_steps": "**Next Steps:**\n• Use `/pokemon list` to view your team\n• Challenge other trainers to battles\n• Explore and catch more Pokemon!",
+    "creation_failed": "❌ Something went wrong creating your team. Please try again in a moment.",
+    "session_expired": "❌ Your starter selection session has expired. Please start again.",
+    "invalid_selection": "❌ Invalid Pokemon selection. Please try again."
+  },
+  "pokemon": {
+    "stats_quality": {
+      "terrible": "Poor",
+      "bad": "Below Average", 
+      "decent": "Average",
+      "good": "Good",
+      "great": "Great",
+      "perfect": "Perfect"
+    },
+    "type_chart": {
+      "strong_vs": "Strong vs:",
+      "weak_vs": "Weak vs:",
+      "immune_to": "Immune to:",
+      "resists": "Resists:"
+    },
+    "types": {
+      "NORMAL": "Normal", "FIRE": "Fire", "WATER": "Water", "ELECTRIC": "Electric",
+      "GRASS": "Grass", "ICE": "Ice", "FIGHTING": "Fighting", "POISON": "Poison",
+      "GROUND": "Ground", "FLYING": "Flying", "PSYCHIC": "Psychic", "BUG": "Bug",
+      "ROCK": "Rock", "GHOST": "Ghost", "DRAGON": "Dragon", "DARK": "Dark",
+      "STEEL": "Steel", "FAIRY": "Fairy"
+    },
+    "status_conditions": {
+      "HEALTHY": "Healthy",
+      "BURN": "Burned",
+      "POISON": "Poisoned", 
+      "PARALYSIS": "Paralyzed",
+      "SLEEP": "Asleep",
+      "FREEZE": "Frozen"
+    }
+  },
+  "notifications": {
+    "new_trainer_title": "🎉 New Trainer Alert!",
+    "new_trainer_description": "{username} has started their Pokemon journey!",
+    "chose_starter": "**Chosen Starter:** {starter_emoji} {nickname} the {species}",
+    "trainer_stats": "**Trainer Info:**\n• Trainer Level: 1\n• Starting Money: 500 Pokedollars\n• Team Size: 3 Pokemon",
+    "welcome_message": "Welcome them to the server and wish them luck on their adventure!"
+  },
+  "errors": {
+    "database_error": "❌ Database error occurred. Please try again later.",
+    "not_configured": "❌ This server is not configured for Pokemon battles. Ask an admin to run `/admin setup`.",
+    "user_not_found": "❌ Trainer not found. Please start your journey first!",
+    "pokemon_not_found": "❌ Pokemon not found.",
+    "invalid_command": "❌ Invalid command or parameters.",
+    "permission_denied": "❌ You don't have permission to use this command.",
+    "cooldown": "❌ Please wait {seconds} seconds before using this command again."
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "admin": {
+    "setup_title": "🔧 Configuración del Bot Pokemon",
+    "setup_description": "Configura los ajustes del bot Pokemon para este servidor.",
+    "set_starter_channel": "Establecer Canal Inicial",
+    "set_updates_channel": "Establecer Canal de Actualizaciones",
+    "set_language": "Cambiar Idioma", 
+    "preview_setup": "Vista Previa",
+    "config_complete": "✅ ¡Configuración Completa!",
+    "config_partial": "⚠️ Configuración Parcial",
+    "config_missing": "❌ Configuración Requerida",
+    "no_permission": "❌ Necesitas permisos de administrador para usar este comando.",
+    "channel_set": "✅ Canal de {channel_type} establecido en {channel}",
+    "language_set": "✅ Idioma del servidor cambiado a {language}",
+    "invalid_channel": "❌ Por favor menciona un canal de texto válido.",
+    "setup_preview": "**Configuración Actual:**\n🏠 Canal Inicial: {starter_channel}\n📢 Canal de Actualizaciones: {updates_channel}\n🌐 Idioma: {language}"
+  },
+  "starter": {
+    "oak_title": "🎓 Laboratorio del Profesor Oak",
+    "oak_description": "¡Bienvenido al mundo Pokemon! Soy el Profesor Oak.\n\nPara comenzar tu aventura, haz clic en el botón de abajo. Elegirás tu primer Pokemon compañero y recibirás tu kit inicial.\n\n**Lo que recibirás:**\n• Un Pokemon inicial con excelentes estadísticas\n• Dos Pokemon adicionales para tu equipo\n• Pokeballs, Pociones y dinero inicial\n• Tu registro oficial de entrenador",
+    "start_journey": "🚀 Comenzar Tu Aventura Pokemon",
+    "already_trainer": "❌ ¡Ya eres un entrenador Pokemon! Tu aventura ya ha comenzado.",
+    "choose_starter": "Elige Tu Pokemon Inicial",
+    "starter_description": "Cada Pokemon tiene estadísticas generadas aleatoriamente. ¡Elige sabiamente - este será tu compañero de por vida!\n\n**Beneficios del Inicial:**\n• Mayor potencial de estadísticas (20-31 IVs)\n• 50% de bonificación de experiencia\n• Estado especial 'Entrenador Original'",
+    "name_modal_title": "Nombra a Tu {pokemon}",
+    "name_modal_label": "Apodo del Pokemon",
+    "name_modal_placeholder": "Ingresa un apodo para tu {pokemon}",
+    "confirm_title": "🎉 Confirma Tu Elección",
+    "confirm_description": "¿Estás seguro de que quieres elegir a **{nickname}** el {pokemon}?",
+    "confirm_button": "✅ Confirmar Elección",
+    "cancel_button": "❌ Elegir Pokemon Diferente",
+    "creating_team": "🔄 Creando tu equipo Pokemon...",
+    "welcome_title": "🎉 ¡Bienvenido al Mundo Pokemon!",
+    "welcome_description": "¡Felicitaciones! ¡Oficialmente te has convertido en un entrenador Pokemon!",
+    "your_starter": "**Tu Pokemon Inicial:**\n{pokemon_info}",
+    "starter_kit": "**Kit Inicial Recibido:**\n• 3× Poción (Cura 20 HP)\n• 1× Antídoto (Cura envenenamiento)\n• 5× Pokeball (Captura Pokemon salvajes)\n• 500 Pokedólares (Moneda de tienda)",
+    "next_steps": "**Próximos Pasos:**\n• Usa `/pokemon list` para ver tu equipo\n• Desafía otros entrenadores a batallas\n• ¡Explora y captura más Pokemon!",
+    "creation_failed": "❌ Algo salió mal creando tu equipo. Por favor intenta de nuevo en un momento.",
+    "session_expired": "❌ Tu sesión de selección inicial ha expirado. Por favor comienza de nuevo.",
+    "invalid_selection": "❌ Selección de Pokemon inválida. Por favor intenta de nuevo."
+  },
+  "pokemon": {
+    "stats_quality": {
+      "terrible": "Malo",
+      "bad": "Bajo Promedio",
+      "decent": "Promedio", 
+      "good": "Bueno",
+      "great": "Excelente",
+      "perfect": "Perfecto"
+    },
+    "type_chart": {
+      "strong_vs": "Fuerte vs:",
+      "weak_vs": "Débil vs:",
+      "immune_to": "Inmune a:",
+      "resists": "Resiste:"
+    },
+    "types": {
+      "NORMAL": "Normal", "FIRE": "Fuego", "WATER": "Agua", "ELECTRIC": "Eléctrico",
+      "GRASS": "Planta", "ICE": "Hielo", "FIGHTING": "Lucha", "POISON": "Veneno",
+      "GROUND": "Tierra", "FLYING": "Volador", "PSYCHIC": "Psíquico", "BUG": "Bicho",
+      "ROCK": "Roca", "GHOST": "Fantasma", "DRAGON": "Dragón", "DARK": "Siniestro",
+      "STEEL": "Acero", "FAIRY": "Hada"
+    },
+    "status_conditions": {
+      "HEALTHY": "Saludable",
+      "BURN": "Quemado",
+      "POISON": "Envenenado",
+      "PARALYSIS": "Paralizado", 
+      "SLEEP": "Dormido",
+      "FREEZE": "Congelado"
+    }
+  },
+  "notifications": {
+    "new_trainer_title": "🎉 ¡Alerta de Nuevo Entrenador!",
+    "new_trainer_description": "¡{username} ha comenzado su aventura Pokemon!",
+    "chose_starter": "**Inicial Elegido:** {starter_emoji} {nickname} el {species}",
+    "trainer_stats": "**Info del Entrenador:**\n• Nivel de Entrenador: 1\n• Dinero Inicial: 500 Pokedólares\n• Tamaño del Equipo: 3 Pokemon",
+    "welcome_message": "¡Dales la bienvenida al servidor y deséales suerte en su aventura!"
+  },
+  "errors": {
+    "database_error": "❌ Ocurrió un error de base de datos. Por favor intenta más tarde.",
+    "not_configured": "❌ Este servidor no está configurado para batallas Pokemon. Pide a un admin que ejecute `/admin setup`.",
+    "user_not_found": "❌ Entrenador no encontrado. ¡Por favor comienza tu aventura primero!",
+    "pokemon_not_found": "❌ Pokemon no encontrado.",
+    "invalid_command": "❌ Comando o parámetros inválidos.",
+    "permission_denied": "❌ No tienes permiso para usar este comando.",
+    "cooldown": "❌ Por favor espera {seconds} segundos antes de usar este comando de nuevo."
+  }
+}
