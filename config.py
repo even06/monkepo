@@ -1,19 +1,22 @@
 # config.py - Pokemon Bot Configuration
 import os
+from dotenv import load_dotenv
 
-# Database Configuration
+load_dotenv()  # Load .env file
+
 DB_CONFIG = {
-    'host': 'localhost',
-    'database': 'pokemon_battle_bot',
-    'user': 'root',
-    'password': os.getenv('MYSQL_PASSWORD', 'your_mysql_password_here'),  # UPDATE THIS
+    'host': os.getenv('MYSQL_HOST', 'localhost'),
+    'database': os.getenv('MYSQL_DATABASE', 'pokemon_battle_bot'),
+    'user': os.getenv('MYSQL_USER', 'root'),
+    'password': os.getenv('MYSQL_PASSWORD'),  # Must be in .env
     'charset': 'utf8mb4',
     'use_unicode': True,
     'autocommit': True
 }
 
+
 # Discord Bot Token
-DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN', 'your_discord_bot_token_here')  # UPDATE THIS
+DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 # Bot Settings
 BOT_PREFIX = '!'
