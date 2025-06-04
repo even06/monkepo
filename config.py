@@ -17,6 +17,7 @@ DB_CONFIG = {
 
 # Discord Bot Token
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
+ACTIVITY_URL = os.getenv('ACTIVITY_URL')
 
 # Bot Settings
 BOT_PREFIX = '!'

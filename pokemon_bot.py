@@ -1562,13 +1562,47 @@ async def pokemon_command(interaction: discord.Interaction, action: str):
 @bot.event
 async def on_ready():
     """Bot startup event"""
+    await safe_sync_commands()
+
+async def safe_sync_commands():
+    """Safely sync commands without affecting Entry Point commands"""
     try:
-        synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} command(s)")
+        # First, try to get existing commands to preserve Entry Point commands
+        existing_commands = await bot.tree.fetch_commands()
+        entry_point_commands = [cmd for cmd in existing_commands if getattr(cmd, 'integration_types', None)]
+        
+        print(f"Found {len(existing_commands)} existing commands")
+        if entry_point_commands:
+            print(f"Found {len(entry_point_commands)} Entry Point commands (preserving them)")
+        
+        # Try normal sync first
+        try:
+            synced = await bot.tree.sync()
+            print(f"✅ Successfully synced {len(synced)} command(s)")
+        except discord.HTTPException as e:
+            if e.code == 50240:  # Entry Point command error
+                print("⚠️ Entry Point command conflict detected")
+                print("🔄 Attempting alternative sync method...")
+                
+                # Alternative approach: clear and re-add commands manually
+                try:
+                    await bot.tree.clear_commands()
+                    synced = await bot.tree.sync()
+                    print(f"✅ Successfully cleared and synced {len(synced)} command(s)")
+                except Exception as clear_error:
+                    print(f"⚠️ Could not clear commands: {clear_error}")
+                    print("📝 Commands may still work despite sync error")
+            else:
+                raise e
+        
         print("🎮 Activity support enabled!")
         print(f"📱 Activity URL: {bot.activity_base_url}")
+        print("🤖 Bot is ready to battle!")
+        
     except Exception as e:
-        print(f"Failed to sync commands: {e}")
+        print(f"❌ Command sync failed: {e}")
+        print("💡 Bot will still function, but commands may not update immediately")
+        print("🔧 To fix: Check Discord Developer Portal > Activities settings")
 
 @bot.event
 async def on_guild_join(guild):
