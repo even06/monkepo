@@ -1159,6 +1159,34 @@ class PokemonBot(commands.Bot):
 # Initialize bot
 bot = PokemonBot()
 
+# Add this as a temporary command to your existing pokemon_bot.py
+@bot.tree.command(name="debug-commands")
+async def debug_commands(interaction: discord.Interaction):
+    """Debug: Show registered commands"""
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("Admin only!", ephemeral=True)
+        return
+    
+    try:
+        app_info = await bot.application_info()
+        commands = await bot.http.get_global_commands(app_info.id)
+        
+        embed = discord.Embed(title="Registered Commands", color=0x3498db)
+        
+        if commands:
+            cmd_list = []
+            for cmd in commands:
+                cmd_type = "Entry Point" if cmd.get('integration_types') else "Slash"
+                cmd_list.append(f"• {cmd['name']} ({cmd_type})")
+            
+            embed.description = "\n".join(cmd_list)
+        else:
+            embed.description = "No commands found!"
+            
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    except Exception as e:
+        await interaction.response.send_message(f"Error: {e}", ephemeral=True)
+
 @bot.tree.command(name="mkp-battle")
 async def battle_command(interaction: discord.Interaction, opponent: discord.Member = None):
     """
@@ -1567,40 +1595,53 @@ async def on_ready():
 async def safe_sync_commands():
     """Safely sync commands without affecting Entry Point commands"""
     try:
-        # First, try to get existing commands to preserve Entry Point commands
+        print("🔄 Starting command sync...")
+        
+        # Get existing commands first
         existing_commands = await bot.tree.fetch_commands()
-        entry_point_commands = [cmd for cmd in existing_commands if getattr(cmd, 'integration_types', None)]
-        
         print(f"Found {len(existing_commands)} existing commands")
-        if entry_point_commands:
-            print(f"Found {len(entry_point_commands)} Entry Point commands (preserving them)")
         
-        # Try normal sync first
+        # Show what commands we're trying to register
+        local_commands = [cmd.name for cmd in bot.tree.get_commands()]
+        print(f"Local commands to sync: {local_commands}")
+        
         try:
             synced = await bot.tree.sync()
             print(f"✅ Successfully synced {len(synced)} command(s)")
+            print(f"Synced commands: {[cmd['name'] for cmd in synced]}")
         except discord.HTTPException as e:
             if e.code == 50240:  # Entry Point command error
                 print("⚠️ Entry Point command conflict detected")
-                print("🔄 Attempting workaround...")
+                print("🔄 Trying alternative sync method...")
                 
-                # Workaround: Just continue - commands might still work
-                print("📝 Continuing with existing commands...")
-                print("💡 Your slash commands should still work even with this error")
-                print("🔧 To permanently fix: Configure Activities properly in Discord Developer Portal")
-                
+                # Alternative: Try to sync without clearing
+                try:
+                    # Force sync by clearing local tree and re-adding
+                    await bot.tree.clear_commands(guild=None)
+                    
+                    # Re-add our commands
+                    bot.tree.add_command(battle_command)
+                    bot.tree.add_command(arena_command)
+                    bot.tree.add_command(battle_info)
+                    bot.tree.add_command(admin_setup)
+                    bot.tree.add_command(pokemon_command)
+                    bot.tree.add_command(debug_commands)  # Add the debug command
+                    
+                    synced = await bot.tree.sync()
+                    print(f"✅ Alternative sync successful: {len(synced)} command(s)")
+                    
+                except Exception as alt_error:
+                    print(f"❌ Alternative sync failed: {alt_error}")
+                    print("📝 Bot will still run but commands may not update")
             else:
                 print(f"❌ Other sync error: {e}")
                 raise e
         
-        print("🎮 Activity support enabled!")
-        print(f"📱 Activity URL: {bot.activity_base_url}")
         print("🤖 Bot is ready to battle!")
         
     except Exception as e:
         print(f"❌ Command sync failed: {e}")
-        print("💡 Bot will still function, but commands may not update immediately")
-        print("🔧 To fix: Check Discord Developer Portal > Activities settings")
+        print("💡 Bot will still function, but commands may not be available")
 
 @bot.event
 async def on_guild_join(guild):
