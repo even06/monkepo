@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Pokemon Battle Bot - Complete Multi-Step Interactive System
-Features: Persistent buttons, IV system, translations, admin setup
+Pokemon Battle Bot - Enhanced with Discord Activity Support
+Now includes basic activity launcher for battle interface
 """
 
 import discord
@@ -301,6 +301,172 @@ class TypeEffectiveness:
             lines.append(f"{weak_text} {', '.join(weak_types)}")
         
         return "\n".join(lines)
+
+class BattleManager:
+    """Manages battle sessions and state"""
+    
+    def __init__(self, db: DatabaseManager):
+        self.db = db
+        self.active_battles = {}  # In-memory battle state storage
+    
+    async def create_battle_session(self, player1_id: str, player2_id: str = None, 
+                                  server_id: str = None) -> str:
+        """Create a new battle session"""
+        battle_id = str(uuid.uuid4())
+        
+        # Insert battle record
+        battle_query = """
+        INSERT INTO battles (id, player1_id, player2_id, status, started_at)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        self.db.execute_query(battle_query, (
+            battle_id, player1_id, player2_id, 'LOBBY', datetime.now()
+        ))
+        
+        # Initialize battle state
+        self.active_battles[battle_id] = {
+            'id': battle_id,
+            'player1_id': player1_id,
+            'player2_id': player2_id,
+            'server_id': server_id,
+            'status': 'LOBBY',
+            'turn': 1,
+            'created_at': datetime.now().isoformat()
+        }
+        
+        print(f"Created battle session: {battle_id}")
+        return battle_id
+    
+    async def get_user_team(self, user_id: str) -> List[Dict]:
+        """Get user's active Pokemon team with calculated stats"""
+        team_query = """
+        SELECT 
+            p.id, p.nickname, p.level, p.current_hp, p.status_condition,
+            p.hp_iv, p.attack_iv, p.defense_iv, p.sp_attack_iv, p.sp_defense_iv, p.speed_iv,
+            s.name as species_name, s.type1, s.type2,
+            s.base_hp, s.base_attack, s.base_defense, s.base_sp_attack, s.base_sp_defense, s.base_speed
+        FROM pokemon p
+        JOIN pokemon_species s ON p.species_id = s.id
+        WHERE p.user_id = %s AND p.is_active = TRUE
+        ORDER BY p.team_slot
+        """
+        team_data = self.db.execute_query(team_query, (user_id,), fetch=True) or []
+        
+        # Calculate final stats for each Pokemon
+        team = []
+        for pokemon in team_data:
+            base_stats = {
+                'hp': pokemon['base_hp'],
+                'attack': pokemon['base_attack'],
+                'defense': pokemon['base_defense'],
+                'sp_attack': pokemon['base_sp_attack'],
+                'sp_defense': pokemon['base_sp_defense'],
+                'speed': pokemon['base_speed']
+            }
+            
+            ivs = {
+                'hp': pokemon['hp_iv'],
+                'attack': pokemon['attack_iv'],
+                'defense': pokemon['defense_iv'],
+                'sp_attack': pokemon['sp_attack_iv'],
+                'sp_defense': pokemon['sp_defense_iv'],
+                'speed': pokemon['speed_iv']
+            }
+            
+            final_stats = IVGenerator.calculate_stats(base_stats, ivs, pokemon['level'])
+            
+            team.append({
+                'id': pokemon['id'],
+                'nickname': pokemon['nickname'] or pokemon['species_name'],
+                'species': pokemon['species_name'],
+                'level': pokemon['level'],
+                'type1': pokemon['type1'],
+                'type2': pokemon['type2'],
+                'current_hp': pokemon['current_hp'] or final_stats['hp'],
+                'max_hp': final_stats['hp'],
+                'stats': final_stats,
+                'status': pokemon['status_condition'],
+                'ivs': ivs
+            })
+        
+        return team
+
+class ActivityLauncherView(discord.ui.View):
+    """View for launching Discord Activities"""
+    
+    def __init__(self, activity_url: str, battle_manager: BattleManager, 
+                 translations: TranslationManager, lang: str = 'en'):
+        super().__init__(timeout=300)
+        self.activity_url = activity_url
+        self.battle_manager = battle_manager
+        self.translations = translations
+        self.lang = lang
+    
+    @discord.ui.button(label='🎮 Launch Battle Arena', 
+                      style=discord.ButtonStyle.primary, 
+                      custom_id='launch_activity')
+    async def launch_activity(self, interaction: discord.Interaction, button: discord.ui.Button):
+        user_id = str(interaction.user.id)
+        server_id = str(interaction.guild.id)
+        
+        # Check if user has a team
+        team = await self.battle_manager.get_user_team(user_id)
+        if len(team) < 3:
+            await interaction.response.send_message(
+                "❌ You need at least 3 Pokemon to battle! Use the starter button to begin your journey.",
+                ephemeral=True
+            )
+            return
+        
+        # Create battle session for practice/demo
+        battle_id = await self.battle_manager.create_battle_session(user_id, server_id=server_id)
+        
+        # Create activity URL with battle session data
+        activity_params = f"?battle_id={battle_id}&user_id={user_id}&mode=practice"
+        full_activity_url = f"{self.activity_url}{activity_params}"
+        
+        # Create launch embed
+        embed = discord.Embed(
+            title="🎮 Pokemon Battle Arena",
+            description="Click the button below to launch the battle interface!",
+            color=0x3498db
+        )
+        
+        embed.add_field(
+            name="📊 Your Team Status",
+            value=f"**Active Pokemon:** {len(team)}/3\n**Ready for Battle:** ✅",
+            inline=True
+        )
+        
+        embed.add_field(
+            name="⚔️ Battle Mode",
+            value="**Practice Mode**\nTest your team and interface",
+            inline=True
+        )
+        
+        # Add team preview
+        team_preview = ""
+        for i, pokemon in enumerate(team[:3], 1):
+            type_emoji = TypeEffectiveness.TYPE_EMOJIS.get(pokemon['type1'], '❓')
+            hp_percent = int((pokemon['current_hp'] / pokemon['max_hp']) * 100)
+            team_preview += f"{i}. {type_emoji} **{pokemon['nickname']}** (Lv.{pokemon['level']}) - {hp_percent}% HP\n"
+        
+        embed.add_field(
+            name="🎒 Your Battle Team",
+            value=team_preview,
+            inline=False
+        )
+        
+        # Create activity launcher button
+        activity_view = discord.ui.View()
+        activity_button = discord.ui.Button(
+            label="🚀 Open Battle Arena",
+            style=discord.ButtonStyle.link,
+            url=full_activity_url
+        )
+        activity_view.add_item(activity_button)
+        
+        await interaction.response.edit_message(embed=embed, view=activity_view)
 
 class StarterSelectionView(discord.ui.View):
     """Starter Pokemon selection interface"""
@@ -705,7 +871,7 @@ class PersistentStarterView(discord.ui.View):
     @discord.ui.button(label='🚀 Start Your Pokemon Journey', 
                   style=discord.ButtonStyle.success, 
                   custom_id='persistent_start_journey')
-    
+
     async def start_journey(self, interaction: discord.Interaction, button: discord.ui.Button):
         user_id = str(interaction.user.id)
         server_id = str(interaction.guild.id)
@@ -962,7 +1128,11 @@ class PokemonBot(commands.Bot):
         self.translations = TranslationManager()
         self.button_manager = PersistentButtonManager(self.db)
         self.button_manager.set_bot(self)
+        self.battle_manager = BattleManager(self.db)
         
+        # Activity configuration
+        self.activity_base_url = "https://monkepo.corebots.guru"  # Replace with your Activity URL
+
         # Store views for persistence
         self.persistent_views_added = False
     
@@ -988,6 +1158,230 @@ class PokemonBot(commands.Bot):
 
 # Initialize bot
 bot = PokemonBot()
+
+@bot.tree.command(name="battle")
+async def battle_command(interaction: discord.Interaction, opponent: discord.Member = None):
+    """
+    Start a Pokemon battle or open practice arena
+    
+    Parameters:
+    opponent: Another trainer to battle (optional - if none, opens practice mode)
+    """
+    user_id = str(interaction.user.id)
+    server_id = str(interaction.guild.id)
+    
+    # Get server language
+    lang_query = "SELECT language FROM servers WHERE id = %s"
+    server_config = bot.db.execute_fetchone(lang_query, (server_id,))
+    lang = server_config['language'] if server_config else 'en'
+    
+    # Check if user exists and has Pokemon
+    user_query = "SELECT id FROM users WHERE id = %s"
+    if not bot.db.execute_fetchone(user_query, (user_id,)):
+        await interaction.response.send_message(
+            bot.translations.get('errors.user_not_found', lang),
+            ephemeral=True
+        )
+        return
+    
+    # Get user's team
+    team = await bot.battle_manager.get_user_team(user_id)
+    if len(team) < 3:
+        await interaction.response.send_message(
+            "❌ You need at least 3 Pokemon to battle! Complete your starter journey first.",
+            ephemeral=True
+        )
+        return
+    
+    if opponent:
+        # PvP Battle (future implementation)
+        opponent_id = str(opponent.id)
+        opponent_team = await bot.battle_manager.get_user_team(opponent_id)
+        
+        if len(opponent_team) < 3:
+            await interaction.response.send_message(
+                f"❌ {opponent.display_name} doesn't have enough Pokemon to battle!",
+                ephemeral=True
+            )
+            return
+        
+        # Create battle invitation embed
+        embed = discord.Embed(
+            title="⚔️ Battle Challenge!",
+            description=f"**{interaction.user.display_name}** challenges **{opponent.display_name}** to a Pokemon battle!",
+            color=0xe74c3c
+        )
+        
+        embed.add_field(
+            name="🎯 Battle Format",
+            value="3v3 Singles Battle\nFirst to defeat all opponent Pokemon wins!",
+            inline=True
+        )
+        
+        embed.add_field(
+            name="⏱️ Time Limit",
+            value="60 seconds per turn\n30 minute battle limit",
+            inline=True
+        )
+        
+        # Add team previews
+        challenger_preview = ""
+        for i, pokemon in enumerate(team[:3], 1):
+            type_emoji = TypeEffectiveness.TYPE_EMOJIS.get(pokemon['type1'], '❓')
+            challenger_preview += f"{type_emoji} {pokemon['nickname']} (Lv.{pokemon['level']})\n"
+        
+        opponent_preview = ""
+        for i, pokemon in enumerate(opponent_team[:3], 1):
+            type_emoji = TypeEffectiveness.TYPE_EMOJIS.get(pokemon['type1'], '❓')
+            opponent_preview += f"{type_emoji} {pokemon['nickname']} (Lv.{pokemon['level']})\n"
+        
+        embed.add_field(
+            name=f"🔥 {interaction.user.display_name}'s Team",
+            value=challenger_preview,
+            inline=True
+        )
+        
+        embed.add_field(
+            name="⚔️ VS",
+            value="**VS**",
+            inline=True
+        )
+        
+        embed.add_field(
+            name=f"💧 {opponent.display_name}'s Team",
+            value=opponent_preview,
+            inline=True
+        )
+        
+        # Battle acceptance view (implement later)
+        view = discord.ui.View()
+        accept_button = discord.ui.Button(
+            label="✅ Accept Challenge",
+            style=discord.ButtonStyle.success,
+            custom_id=f"accept_battle_{user_id}"
+        )
+        decline_button = discord.ui.Button(
+            label="❌ Decline",
+            style=discord.ButtonStyle.danger,
+            custom_id="decline_battle"
+        )
+        view.add_item(accept_button)
+        view.add_item(decline_button)
+        
+        await interaction.response.send_message(
+            content=f"{opponent.mention}",
+            embed=embed,
+            view=view
+        )
+    
+    else:
+        # Practice Mode - Launch Activity
+        embed = discord.Embed(
+            title="🎮 Pokemon Battle Arena",
+            description="Welcome to the Pokemon Battle Arena! Choose your battle mode below.",
+            color=0x3498db
+        )
+        
+        embed.add_field(
+            name="🥊 Practice Mode",
+            value="Train against AI opponents\nTest your team and strategies\nNo risk of losing Pokemon",
+            inline=True
+        )
+        
+        embed.add_field(
+            name="📊 Your Team",
+            value=f"**Pokemon Ready:** {len(team)}/3\n**Status:** Ready for Battle ✅",
+            inline=True
+        )
+        
+        # Team preview
+        team_preview = ""
+        total_level = 0
+        for i, pokemon in enumerate(team[:3], 1):
+            type_emoji = TypeEffectiveness.TYPE_EMOJIS.get(pokemon['type1'], '❓')
+            hp_percent = int((pokemon['current_hp'] / pokemon['max_hp']) * 100)
+            status_icon = "❤️" if hp_percent > 75 else "💛" if hp_percent > 25 else "🧡"
+            team_preview += f"{type_emoji} **{pokemon['nickname']}** (Lv.{pokemon['level']}) {status_icon}\n"
+            total_level += pokemon['level']
+        
+        embed.add_field(
+            name="⭐ Your Battle Team",
+            value=team_preview,
+            inline=False
+        )
+        
+        embed.add_field(
+            name="💪 Team Power Level",
+            value=f"Average Level: **{total_level // len(team)}**\nCombined Level: **{total_level}**",
+            inline=True
+        )
+        
+        embed.set_footer(text="💡 Tip: Practice battles help you learn type matchups and strategies!")
+        
+        # Create activity launcher
+        view = ActivityLauncherView(
+            bot.activity_base_url,
+            bot.battle_manager,
+            bot.translations,
+            lang
+        )
+        
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+@bot.tree.command(name="arena")
+async def arena_command(interaction: discord.Interaction):
+    """Quick access to the Pokemon Battle Arena"""
+    await battle_command(interaction)
+
+# ========================================
+# BATTLE STATE API ENDPOINTS (for Activity)
+# ========================================
+
+@bot.tree.command(name="battle-info")
+async def battle_info(interaction: discord.Interaction, battle_id: str = None):
+    """Get battle information (for debugging/testing)"""
+    user_id = str(interaction.user.id)
+    
+    if not battle_id:
+        # Show user's recent battles
+        battles_query = """
+        SELECT id, player1_id, player2_id, status, started_at
+        FROM battles 
+        WHERE player1_id = %s OR player2_id = %s
+        ORDER BY started_at DESC
+        LIMIT 5
+        """
+        battles = bot.db.execute_query(battles_query, (user_id, user_id), fetch=True) or []
+        
+        if not battles:
+            await interaction.response.send_message("No battles found.", ephemeral=True)
+            return
+        
+        embed = discord.Embed(title="Your Recent Battles", color=0x3498db)
+        for battle in battles:
+            opponent_id = battle['player2_id'] if battle['player1_id'] == user_id else battle['player1_id']
+            opponent = "Practice Mode" if not opponent_id else f"<@{opponent_id}>"
+            
+            embed.add_field(
+                name=f"Battle {battle['id'][:8]}...",
+                value=f"**Status:** {battle['status']}\n**Opponent:** {opponent}\n**Started:** {battle['started_at']}",
+                inline=True
+            )
+        
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    
+    else:
+        # Show specific battle info
+        if battle_id in bot.battle_manager.active_battles:
+            battle_state = bot.battle_manager.active_battles[battle_id]
+            embed = discord.Embed(
+                title=f"Battle {battle_id[:8]}...",
+                description=f"**Status:** {battle_state['status']}\n**Turn:** {battle_state['turn']}",
+                color=0x2ecc71
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+        else:
+            await interaction.response.send_message("Battle not found or inactive.", ephemeral=True)
 
 # Admin Commands
 @bot.tree.command(name="mkp-admin")
@@ -1171,6 +1565,8 @@ async def on_ready():
     try:
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} command(s)")
+        print("🎮 Activity support enabled!")
+        print(f"📱 Activity URL: {bot.activity_base_url}")
     except Exception as e:
         print(f"Failed to sync commands: {e}")
 
