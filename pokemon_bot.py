@@ -1612,48 +1612,37 @@ async def safe_sync_commands():
         except discord.HTTPException as e:
             if e.code == 50240:  # Entry Point command error
                 print("⚠️ Entry Point command conflict detected")
-                print("🔄 Trying alternative sync method...")
+                print("🔄 Commands may already exist as Entry Point commands...")
                 
-                # Get application info for manual API call
+                # Get application info for checking
                 app_info = await bot.application_info()
-                
-                # Get current registered commands
                 current_commands = await bot.http.get_global_commands(app_info.id)
-                entry_point_commands = [cmd for cmd in current_commands if cmd.get('integration_types')]
                 
-                print(f"Found {len(entry_point_commands)} Entry Point commands to preserve")
+                # Show what's already registered
+                print("📋 Currently registered commands:")
+                existing_names = []
+                for cmd in current_commands:
+                    cmd_type = "Entry Point" if cmd.get('integration_types') else "Slash"
+                    print(f"  - {cmd['name']} ({cmd_type})")
+                    existing_names.append(cmd['name'])
                 
-                # Build command list manually, preserving Entry Point commands
-                commands_to_sync = []
+                # Check which of our commands are already there
+                already_exists = []
+                missing = []
+                for local_cmd in local_commands:
+                    if local_cmd in existing_names:
+                        already_exists.append(local_cmd)
+                    else:
+                        missing.append(local_cmd)
                 
-                # Add Entry Point commands first
-                for ep_cmd in entry_point_commands:
-                    commands_to_sync.append(ep_cmd)
-                    print(f"Preserving Entry Point command: {ep_cmd['name']}")
+                if already_exists:
+                    print(f"✅ Commands already registered: {already_exists}")
+                if missing:
+                    print(f"❌ Commands missing: {missing}")
+                else:
+                    print("✅ All your commands are already registered!")
+                    print("💡 They might be Entry Point commands - try using them in Discord")
                 
-                # Add our bot's commands
-                for cmd in bot.tree.get_commands():
-                    cmd_data = {
-                        'name': cmd.name,
-                        'description': cmd.description,
-                        'type': 1,  # Slash command
-                        'options': []
-                    }
-                    commands_to_sync.append(cmd_data)
-                
-                try:
-                    # Manually sync with preserved Entry Point commands
-                    synced = await bot.http.bulk_upsert_global_commands(app_info.id, commands_to_sync)
-                    print(f"✅ Manual sync successful: {len(synced)} total command(s)")
-                    
-                    # Show what was synced
-                    for cmd in synced:
-                        cmd_type = "Entry Point" if cmd.get('integration_types') else "Slash"
-                        print(f"  - {cmd['name']} ({cmd_type})")
-                    
-                except Exception as manual_error:
-                    print(f"❌ Manual sync failed: {manual_error}")
-                    print("📝 Bot will still run but commands may not update")
             else:
                 print(f"❌ Other sync error: {e}")
                 raise e
