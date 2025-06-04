@@ -1582,17 +1582,15 @@ async def safe_sync_commands():
         except discord.HTTPException as e:
             if e.code == 50240:  # Entry Point command error
                 print("⚠️ Entry Point command conflict detected")
-                print("🔄 Attempting alternative sync method...")
+                print("🔄 Attempting workaround...")
                 
-                # Alternative approach: clear and re-add commands manually
-                try:
-                    await bot.tree.clear_commands()
-                    synced = await bot.tree.sync()
-                    print(f"✅ Successfully cleared and synced {len(synced)} command(s)")
-                except Exception as clear_error:
-                    print(f"⚠️ Could not clear commands: {clear_error}")
-                    print("📝 Commands may still work despite sync error")
+                # Workaround: Just continue - commands might still work
+                print("📝 Continuing with existing commands...")
+                print("💡 Your slash commands should still work even with this error")
+                print("🔧 To permanently fix: Configure Activities properly in Discord Developer Portal")
+                
             else:
+                print(f"❌ Other sync error: {e}")
                 raise e
         
         print("🎮 Activity support enabled!")
