@@ -1614,24 +1614,45 @@ async def safe_sync_commands():
                 print("⚠️ Entry Point command conflict detected")
                 print("🔄 Trying alternative sync method...")
                 
-                # Alternative: Try to sync without clearing
+                # Get application info for manual API call
+                app_info = await bot.application_info()
+                
+                # Get current registered commands
+                current_commands = await bot.http.get_global_commands(app_info.id)
+                entry_point_commands = [cmd for cmd in current_commands if cmd.get('integration_types')]
+                
+                print(f"Found {len(entry_point_commands)} Entry Point commands to preserve")
+                
+                # Build command list manually, preserving Entry Point commands
+                commands_to_sync = []
+                
+                # Add Entry Point commands first
+                for ep_cmd in entry_point_commands:
+                    commands_to_sync.append(ep_cmd)
+                    print(f"Preserving Entry Point command: {ep_cmd['name']}")
+                
+                # Add our bot's commands
+                for cmd in bot.tree.get_commands():
+                    cmd_data = {
+                        'name': cmd.name,
+                        'description': cmd.description,
+                        'type': 1,  # Slash command
+                        'options': []
+                    }
+                    commands_to_sync.append(cmd_data)
+                
                 try:
-                    # Force sync by clearing local tree and re-adding
-                    await bot.tree.clear_commands(guild=None)
+                    # Manually sync with preserved Entry Point commands
+                    synced = await bot.http.bulk_upsert_global_commands(app_info.id, commands_to_sync)
+                    print(f"✅ Manual sync successful: {len(synced)} total command(s)")
                     
-                    # Re-add our commands
-                    bot.tree.add_command(battle_command)
-                    bot.tree.add_command(arena_command)
-                    bot.tree.add_command(battle_info)
-                    bot.tree.add_command(admin_setup)
-                    bot.tree.add_command(pokemon_command)
-                    bot.tree.add_command(debug_commands)  # Add the debug command
+                    # Show what was synced
+                    for cmd in synced:
+                        cmd_type = "Entry Point" if cmd.get('integration_types') else "Slash"
+                        print(f"  - {cmd['name']} ({cmd_type})")
                     
-                    synced = await bot.tree.sync()
-                    print(f"✅ Alternative sync successful: {len(synced)} command(s)")
-                    
-                except Exception as alt_error:
-                    print(f"❌ Alternative sync failed: {alt_error}")
+                except Exception as manual_error:
+                    print(f"❌ Manual sync failed: {manual_error}")
                     print("📝 Bot will still run but commands may not update")
             else:
                 print(f"❌ Other sync error: {e}")
