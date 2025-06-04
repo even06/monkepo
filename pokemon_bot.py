@@ -1612,37 +1612,27 @@ async def safe_sync_commands():
         except discord.HTTPException as e:
             if e.code == 50240:  # Entry Point command error
                 print("⚠️ Entry Point command conflict detected")
-                print("🔄 Commands may already exist as Entry Point commands...")
+                print("🔄 Trying alternative sync method...")
                 
-                # Get application info for checking
-                app_info = await bot.application_info()
-                current_commands = await bot.http.get_global_commands(app_info.id)
-                
-                # Show what's already registered
-                print("📋 Currently registered commands:")
-                existing_names = []
-                for cmd in current_commands:
-                    cmd_type = "Entry Point" if cmd.get('integration_types') else "Slash"
-                    print(f"  - {cmd['name']} ({cmd_type})")
-                    existing_names.append(cmd['name'])
-                
-                # Check which of our commands are already there
-                already_exists = []
-                missing = []
-                for local_cmd in local_commands:
-                    if local_cmd in existing_names:
-                        already_exists.append(local_cmd)
-                    else:
-                        missing.append(local_cmd)
-                
-                if already_exists:
-                    print(f"✅ Commands already registered: {already_exists}")
-                if missing:
-                    print(f"❌ Commands missing: {missing}")
-                else:
-                    print("✅ All your commands are already registered!")
-                    print("💡 They might be Entry Point commands - try using them in Discord")
-                
+                # Alternative: Try to sync without clearing
+                try:
+                    # Force sync by clearing local tree and re-adding
+                    await bot.tree.clear_commands(guild=None)
+                    
+                    # Re-add our commands
+                    bot.tree.add_command(battle_command)
+                    bot.tree.add_command(arena_command)
+                    bot.tree.add_command(battle_info)
+                    bot.tree.add_command(admin_setup)
+                    bot.tree.add_command(pokemon_command)
+                    bot.tree.add_command(debug_commands)  # Add the debug command
+                    
+                    synced = await bot.tree.sync()
+                    print(f"✅ Alternative sync successful: {len(synced)} command(s)")
+                    
+                except Exception as alt_error:
+                    print(f"❌ Alternative sync failed: {alt_error}")
+                    print("📝 Bot will still run but commands may not update")
             else:
                 print(f"❌ Other sync error: {e}")
                 raise e
