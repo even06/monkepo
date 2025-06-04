@@ -1159,7 +1159,7 @@ class PokemonBot(commands.Bot):
 # Initialize bot
 bot = PokemonBot()
 
-@bot.tree.command(name="battle")
+@bot.tree.command(name="mkp-battle")
 async def battle_command(interaction: discord.Interaction, opponent: discord.Member = None):
     """
     Start a Pokemon battle or open practice arena
@@ -1328,7 +1328,7 @@ async def battle_command(interaction: discord.Interaction, opponent: discord.Mem
         
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
-@bot.tree.command(name="arena")
+@bot.tree.command(name="mkp-arena")
 async def arena_command(interaction: discord.Interaction):
     """Quick access to the Pokemon Battle Arena"""
     await battle_command(interaction)
@@ -1337,7 +1337,7 @@ async def arena_command(interaction: discord.Interaction):
 # BATTLE STATE API ENDPOINTS (for Activity)
 # ========================================
 
-@bot.tree.command(name="battle-info")
+@bot.tree.command(name="mkp-battle-info")
 async def battle_info(interaction: discord.Interaction, battle_id: str = None):
     """Get battle information (for debugging/testing)"""
     user_id = str(interaction.user.id)
