@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Battle Arena</title>
+    <script src="https://discord.com/api/sdk/embedded-app-sdk/latest/discord-embedded-app-sdk.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .battle-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .battle-header {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .battle-info {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            padding: 4px 12px;
+            border-radius: 15px;
+            background: #2ecc71;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .battlefield {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxwYXR0ZXJuIGlkPSJncmFzcyIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIj4KICAgICAgPHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjNGFkNjZkIi8+CiAgICAgIDxyZWN0IHdpZHRoPSI1IiBoZWlnaHQ9IjUiIGZpbGw9IiM0N2Q2NjEiLz4KICAgIDwvcGF0dGVybj4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmFzcykiLz4KPC9zdmc+') repeat;
+            background-size: 50px 50px;
+            position: relative;
+        }
+
+        .opponent-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 40%;
+        }
+
+        .player-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 40%;
+        }
+
+        .pokemon-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            min-width: 300px;
+            text-align: center;
+        }
+
+        .pokemon-sprite {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #ffffff 30%, transparent 70%);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .pokemon-info {
+            margin-bottom: 15px;
+        }
+
+        .pokemon-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .pokemon-level {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .hp-bar-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        .hp-bar {
+            height: 8px;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .hp-text {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 3px;
+        }
+
+        .battle-controls {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-button {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            border: none;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .control-button:active {
+            transform: translateY(0px);
+        }
+
+        .control-button.attack {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .control-button.attack:hover {
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .pokeball {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(to bottom, #ff6b6b 50%, white 50%);
+            border-radius: 50%;
+            position: relative;
+            animation: spin 2s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .pokeball::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 50%;
+        }
+
+        .pokeball::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #333;
+            transform: translateY(-50%);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .battle-log {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 120px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .type-fire { color: #ff6b6b; }
+        .type-water { color: #74b9ff; }
+        .type-grass { color: #00b894; }
+        .type-electric { color: #fdcb6e; }
+
+        @media (max-width: 600px) {
+            .battle-controls {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .control-button {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+            
+            .pokemon-display {
+                min-width: 250px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="pokeball"></div>
+        <h2>Loading Pokemon Battle Arena...</h2>
+        <p>Connecting to Discord...</p>
+    </div>
+
+    <div class="battle-container" id="battleContainer" style="display: none;">
+        <!-- Battle Header -->
+        <div class="battle-header">
+            <div class="battle-info">
+                <span>Turn: <span id="turnCounter">1</span></span>
+                <span>Mode: <span id="battleMode">Practice</span></span>
+                <span>Format: 3v3 Singles</span>
+            </div>
+            <div class="status-indicator" id="connectionStatus">Connected</div>
+        </div>
+
+        <!-- Battlefield -->
+        <div class="battlefield">
+            <!-- Opponent Area -->
+            <div class="opponent-area">
+                <div class="pokemon-display">
+                    <div class="pokemon-sprite" id="opponentSprite">🔥</div>
+                    <div class="pokemon-info">
+                        <div class="pokemon-name" id="opponentName">Wild Charmander</div>
+                        <div class="pokemon-level" id="opponentLevel">Level 5</div>
+                    </div>
+                    <div class="hp-bar-container">
+                        <div class="hp-bar" id="opponentHpBar" style="width: 100%;"></div>
+                        <div class="hp-text" id="opponentHpText">45/45 HP</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Area -->
+            <div class="player-area">
+                <div class="pokemon-display">
+                    <div class="pokemon-sprite" id="playerSprite">💧</div>
+                    <div class="pokemon-info">
+                        <div class="pokemon-name" id="playerName">Your Squirtle</div>
+                        <div class="pokemon-level" id="playerLevel">Level 5</div>
+                    </div>
+                    <div class="hp-bar-container">
+                        <div class="hp-bar" id="playerHpBar" style="width: 100%;"></div>
+                        <div class="hp-text" id="playerHpText">48/48 HP</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Battle Log -->
+            <div class="battle-log" id="battleLog">
+                <div class="log-entry">🎮 Battle Arena loaded successfully!</div>
+                <div class="log-entry">⚔️ Practice battle ready to begin!</div>
+                <div class="log-entry">💡 Choose your action to start the battle.</div>
+            </div>
+        </div>
+
+        <!-- Battle Controls -->
+        <div class="battle-controls">
+            <button class="control-button attack" onclick="performAction('attack')">
+                ⚔️ Attack
+            </button>
+            <button class="control-button" onclick="performAction('switch')">
+                🔄 Switch
+            </button>
+            <button class="control-button" onclick="performAction('items')">
+                🎒 Items
+            </button>
+            <button class="control-button" onclick="performAction('run')">
+                🏃 Run
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Discord SDK initialization
+        let discordSdk;
+        let battleData = {
+            battleId: null,
+            userId: null,
+            mode: 'practice',
+            turn: 1,
+            playerPokemon: {
+                name: 'Your Squirtle',
+                level: 5,
+                hp: 48,
+                maxHp: 48,
+                sprite: '💧'
+            },
+            opponentPokemon: {
+                name: 'Wild Charmander', 
+                level: 5,
+                hp: 45,
+                maxHp: 45,
+                sprite: '🔥'
+            }
+        };
+
+        // Initialize Discord Activity
+        async function initializeDiscord() {
+            try {
+                discordSdk = new DiscordSDK(process.env.DISCORD_CLIENT_ID || 'your_client_id');
+                await discordSdk.ready();
+                
+                // Parse URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                battleData.battleId = urlParams.get('battle_id');
+                battleData.userId = urlParams.get('user_id');
+                battleData.mode = urlParams.get('mode') || 'practice';
+                
+                console.log('Discord SDK ready!', {
+                    battleId: battleData.battleId,
+                    userId: battleData.userId,
+                    mode: battleData.mode
+                });
+                
+                // Load battle data
+                await loadBattleData();
+                
+                // Hide loading screen and show battle
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('battleContainer').style.display = 'flex';
+                
+                updateBattleDisplay();
+                
+            } catch (error) {
+                console.error('Failed to initialize Discord SDK:', error);
+                addBattleLog('❌ Failed to connect to Discord');
+                
+                // Still show the interface for testing
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('battleContainer').style.display = 'flex';
+                updateBattleDisplay();
+            }
+        }
+
+        // Load battle data from your backend
+        async function loadBattleData() {
+            if (!battleData.battleId) {
+                addBattleLog('🎮 Practice mode - no battle data to load');
+                return;
+            }
+
+            try {
+                // This would connect to your backend API
+                // const response = await fetch(`/api/battle/${battleData.battleId}`);
+                // const data = await response.json();
+                
+                addBattleLog('📡 Battle data loaded successfully');
+            } catch (error) {
+                console.error('Failed to load battle data:', error);
+                addBattleLog('⚠️ Using default battle data');
+            }
+        }
+
+        // Update the battle display
+        function updateBattleDisplay() {
+            // Update turn counter
+            document.getElementById('turnCounter').textContent = battleData.turn;
+            document.getElementById('battleMode').textContent = battleData.mode;
+            
+            // Update player Pokemon
+            document.getElementById('playerName').textContent = battleData.playerPokemon.name;
+            document.getElementById('playerLevel').textContent = `Level ${battleData.playerPokemon.level}`;
+            document.getElementById('playerSprite').textContent = battleData.playerPokemon.sprite;
+            
+            const playerHpPercent = (battleData.playerPokemon.hp / battleData.playerPokemon.maxHp) * 100;
+            document.getElementById('playerHpBar').style.width = `${playerHpPercent}%`;
+            document.getElementById('playerHpText').textContent = 
+                `${battleData.playerPokemon.hp}/${battleData.playerPokemon.maxHp} HP`;
+            
+            // Update opponent Pokemon
+            document.getElementById('opponentName').textContent = battleData.opponentPokemon.name;
+            document.getElementById('opponentLevel').textContent = `Level ${battleData.opponentPokemon.level}`;
+            document.getElementById('opponentSprite').textContent = battleData.opponentPokemon.sprite;
+            
+            const opponentHpPercent = (battleData.opponentPokemon.hp / battleData.opponentPokemon.maxHp) * 100;
+            document.getElementById('opponentHpBar').style.width = `${opponentHpPercent}%`;
+            document.getElementById('opponentHpText').textContent = 
+                `${battleData.opponentPokemon.hp}/${battleData.opponentPokemon.maxHp} HP`;
+        }
+
+        // Perform battle action
+        function performAction(action) {
+            addBattleLog(`🎯 You chose: ${action.toUpperCase()}`);
+            
+            switch(action) {
+                case 'attack':
+                    performAttack();
+                    break;
+                case 'switch':
+                    showSwitchMenu();
+                    break;
+                case 'items':
+                    showItemsMenu();
+                    break;
+                case 'run':
+                    attemptRun();
+                    break;
+            }
+        }
+
+        // Simulate an attack
+        function performAttack() {
+            const moves = ['Water Gun', 'Tackle', 'Bubble', 'Withdraw'];
+            const selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            
+            addBattleLog(`💧 ${battleData.playerPokemon.name} used ${selectedMove}!`);
+            
+            // Simulate damage
+            const damage = Math.floor(Math.random() * 15) + 10;
+            battleData.opponentPokemon.hp = Math.max(0, battleData.opponentPokemon.hp - damage);
+            
+            if (damage > 20) {
+                addBattleLog('💥 It was super effective!');
+            } else if (damage < 15) {
+                addBattleLog('😐 It was not very effective...');
+            }
+            
+            addBattleLog(`⚔️ ${battleData.opponentPokemon.name} took ${damage} damage!`);
+            
+            // Check if opponent fainted
+            if (battleData.opponentPokemon.hp <= 0) {
+                addBattleLog(`😵 ${battleData.opponentPokemon.name} fainted!`);
+                addBattleLog('🎉 You won the battle!');
+            } else {
+                // Opponent attacks back
+                setTimeout(() => {
+                    opponentAttack();
+                }, 1500);
+            }
+            
+            battleData.turn++;
+            updateBattleDisplay();
+        }
+
+        // Simulate opponent attack
+        function opponentAttack() {
+            const moves = ['Ember', 'Scratch', 'Growl', 'Smokescreen'];
+            const selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            
+            addBattleLog(`🔥 ${battleData.opponentPokemon.name} used ${selectedMove}!`);
+            
+            if (selectedMove === 'Growl' || selectedMove === 'Smokescreen') {
+                addBattleLog('📊 A status move was used!');
+                return;
+            }
+            
+            const damage = Math.floor(Math.random() * 12) + 8;
+            battleData.playerPokemon.hp = Math.max(0, battleData.playerPokemon.hp - damage);
+            
+            addBattleLog(`💢 ${battleData.playerPokemon.name} took ${damage} damage!`);
+            
+            if (battleData.playerPokemon.hp <= 0) {
+                addBattleLog(`😵 ${battleData.playerPokemon.name} fainted!`);
+                addBattleLog('💔 You lost the battle!');
+            }
+            
+            updateBattleDisplay();
+        }
+
+        // Show switch menu (placeholder)
+        function showSwitchMenu() {
+            addBattleLog('🔄 Switch menu not yet implemented');
+            addBattleLog('💡 This will show your team to switch Pokemon');
+        }
+
+        // Show items menu (placeholder) 
+        function showItemsMenu() {
+            addBattleLog('🎒 Items menu not yet implemented');
+            addBattleLog('💡 This will show your bag with Potions, etc.');
+        }
+
+        // Attempt to run from battle
+        function attemptRun() {
+            if (battleData.mode === 'practice') {
+                addBattleLog('🏃 Successfully ran from the practice battle!');
+                addBattleLog('👋 Thanks for testing the Pokemon Battle Arena!');
+            } else {
+                addBattleLog('❌ Cannot run from trainer battles!');
+            }
+        }
+
+        // Add message to battle log
+        function addBattleLog(message) {
+            const logContainer = document.getElementById('battleLog');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.textContent = message;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Limit log entries
+            const entries = logContainer.querySelectorAll('.log-entry');
+            if (entries.length > 10) {
+                entries[0].remove();
+            }
+        }
+
+        // Auto-save battle state
+        function saveBattleState() {
+            if (battleData.battleId) {
+                // This would send state to your backend
+                console.log('Saving battle state:', battleData);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDiscord();
+            
+            // Auto-save every 10 seconds
+            setInterval(saveBattleState, 10000);
+        });
+
+        // Handle window beforeunload
+        window.addEventListener('beforeunload', () => {
+            saveBattleState();
+        });
+    </script>
+</body>
+</html>
